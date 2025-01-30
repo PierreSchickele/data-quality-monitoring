@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, date
 import numpy as np
 
@@ -22,7 +23,8 @@ class Sensor(object):
         during the day"""
 
         # Ensure reproducibility of measurements
-        np.random.seed(seed=obs_date.toordinal())
+        seed_number = (obs_date.toordinal() - 1) * 24 + obs_hour
+        np.random.seed(seed=seed_number)
 
         # The sensor can malfunction sometimes
         failure_number = np.random.random()
@@ -48,13 +50,20 @@ class Sensor(object):
 
 
 if __name__ == "__main__":
-    sensor1 = Sensor(40)
-    dt_open = datetime(2025, 1, 24, 12)
-    dt_closed = datetime(2025, 1, 24, 1)
-    sunday = datetime(2025, 1, 26, 12)
+    if len(sys.argv) > 1:
+        year, month, day = [int(v) for v in sys.argv[1].split("-")]
+    else:
+        year, month, day = 2023, 10, 25
+    queried_date = date(year, month, day)
 
-    for item in (dt_open, dt_closed, sunday):
-        print(
-            f"Datetime : {item}, Date : {item.date()}, Jour : {item.weekday()}, Heure : {item.hour}"
-        )
-        print(sensor1.get_number_visitors(item.date(), item.hour))
+    capteur = Sensor(40)
+
+    output_dict = [
+        {
+            "hour": hour,
+            "number_visitors": capteur.get_number_visitors(queried_date, hour),
+        }
+        for hour in range(24)
+    ]
+
+    print(output_dict)
