@@ -58,12 +58,8 @@ if __name__ == "__main__":
 
     capteur = Sensor(40)
 
-    output_dict = [
-        {
-            "hour": hour,
-            "number_visitors": capteur.get_number_visitors(queried_date, hour),
-        }
-        for hour in range(24)
-    ]
+    output_dict = {
+        hour: capteur.get_number_visitors(queried_date, hour) for hour in range(24)
+    }
 
     print(output_dict)
