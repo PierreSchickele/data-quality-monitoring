@@ -7,23 +7,25 @@ class Sensor(object):
 
     def __init__(
         self,
-        visits_per_hour: int = 40,
-        perc_break: float = 0.015,
-        perc_malfunction: float = 0.035,
+        sensor_id: int,
+        visits_per_hour: int = 100,
+        perc_malfunction: float = 0,
+        perc_break: float = 0,
     ) -> None:
         """Initialize sensor"""
+        self.sensor_id = sensor_id
         self.visits_per_hour = visits_per_hour
-        self.perc_break = perc_break
         self.perc_malfunction = perc_malfunction
+        self.perc_break = perc_break
         self.opening_hour = 8
         self.closing_hour = 19
 
-    def get_number_visitors(self, obs_date: date, obs_hour: int) -> object:
+    def get_number_visitors(self, obs_date: date, obs_hour: int) -> int | None:
         """Return the number of visitors detected by the sensor
         during the day"""
 
         # Ensure reproducibility of measurements
-        seed_number = (obs_date.toordinal() - 1) * 24 + obs_hour
+        seed_number = (obs_date.toordinal() - 1) * 240 + obs_hour * 10 + self.sensor_id
         np.random.seed(seed=seed_number)
 
         # The sensor can malfunction sometimes
