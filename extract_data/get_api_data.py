@@ -3,22 +3,19 @@ from datetime import date
 import requests
 
 
-def read_date_input() -> date | None:
+def read_date_input(input_date: str) -> date | None:
     """
     Verify that the parameter given by the user is a date in YYYY-MM-DD format,
     then return the date.
+    :param input_date: parameter entered by the user
     :return: The date in YYYY-MM-DD format
     """
-    if len(sys.argv) > 1:
-        try:
-            year, month, day = [int(v) for v in sys.argv[1].split("-")]
-            queried_date = date(year, month, day)
-            print(queried_date)
-            return queried_date
-        except ValueError:
-            print("Format incorrect. Saisir une date de format : YYYY-MM-DD")
-    else:
-        print("Indiquer une date en paramètre")
+    try:
+        year, month, day = [int(v) for v in input_date.split("-")]
+        queried_date = date(year, month, day)
+        return queried_date
+    except ValueError:
+        print("Incorrect value. The date format should be: YYYY-MM-DD")
 
 
 def connect_api(store_name: str, queried_date: date, sensor_id: int | None) -> None:
