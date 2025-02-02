@@ -48,6 +48,10 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
 
 
 def get_data() -> str:
+    """
+    Print the API response into a string.
+    :return: a string which contains API response (JSON type or error)
+    """
     user_input = sys.argv
 
     # Check if there is enough parameters
