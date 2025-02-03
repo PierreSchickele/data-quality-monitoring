@@ -30,7 +30,7 @@ class TestSensor(unittest.TestCase):
 
     def test_with_break(self):
         visit_sensor = Sensor(0, 40, 0, 1)
-        visit_count = visit_sensor.get_number_visitors(date(2023, 10, 22), 12)
+        visit_count = visit_sensor.get_number_visitors(date(2023, 10, 23), 12)
         self.assertEqual(visit_count, None)
 
     def test_with_malfunction(self):

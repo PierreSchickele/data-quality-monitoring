@@ -28,6 +28,10 @@ class Sensor(object):
         seed_number = (obs_date.toordinal() - 1) * 240 + obs_hour * 10 + self.sensor_id
         np.random.seed(seed=seed_number)
 
+        # The store is closed on Sunday
+        if obs_date.weekday() == 6:
+            return 0
+
         # The sensor can malfunction sometimes
         failure_number = np.random.random()
 
@@ -36,10 +40,6 @@ class Sensor(object):
 
         if failure_number < self.perc_malfunction:
             return 99999999
-
-        # The store is closed on Sunday
-        if obs_date.weekday() == 6:
-            return 0
 
         # The store is closed by night
         is_night_hour = (obs_hour < self.opening_hour) or (
