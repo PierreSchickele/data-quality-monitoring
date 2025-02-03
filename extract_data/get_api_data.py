@@ -1,3 +1,5 @@
+import csv
+import os
 import sys
 from datetime import date
 import requests
@@ -79,5 +81,55 @@ def get_data() -> str:
         return connect_api(store_name_input, date_input)
 
 
+def write_csv():
+    # Write the output of get_data
+    output = get_data()
+
+    # Check type of json data
+    if isinstance(output, str) and output.__contains__("closed"):
+        print(output)
+        return 1
+
+    if not isinstance(output, dict):
+        print(output)
+        raise Exception("Error: Unexpected JSON format")
+
+    # Extract date, store_name and sensor_id
+    date_str = output.pop("date")
+    store_name = output.pop("store_name")
+    sensor_id = output.pop("sensor_id", None)
+
+    # Extract the year and the month from the "date" field
+    year, month = date_str.split("-")[:2]
+
+    # Name the CSV file
+    filename = f"data/raw/store_visits_{year}-{month}.csv"
+
+    # Check if the file already exists
+    file_exists = os.path.isfile(filename) and os.path.getsize(filename) > 0
+
+    # Open the file in "append" mode (a)
+    with open(filename, mode="a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+
+        # Write the CSV header only if the file is empty
+        if not file_exists:
+            writer.writerow(["date", "hour", "store_name", "sensor_id", "visits_count"])
+
+        for hour, visits_count in output.items():
+            writer.writerow(
+                [
+                    date_str,
+                    int(hour),
+                    store_name,
+                    sensor_id if sensor_id is not None else "ALL",
+                    visits_count,
+                ]
+            )
+
+    print(f"Données enregistrées dans {filename}")
+    return 0
+
+
 if __name__ == "__main__":
-    print(get_data())
+    write_csv()
