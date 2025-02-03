@@ -34,11 +34,7 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
     if sensor_id is not None:
         url += f"&sensor_id={sensor_id}"
 
-    try:
-        response = requests.get(url)
-    except requests.exceptions.ConnectionError as ce:
-        print(ce)
-        return "Failed to establish a connection to the API."
+    response = requests.get(url)
 
     if response.status_code != 200:
         print("Error in the API request:", response.status_code)
@@ -56,12 +52,12 @@ def get_data() -> str:
 
     # Check if there is enough parameters
     if len(user_input) <= 2:
-        return "Error: not enough parameters"
+        raise Exception("Error: not enough parameters")
 
     # Check if the first parameter is a date
     date_input = read_date_input(user_input[1])
     if date_input is None:
-        return "Error: wrong type of date"
+        raise TypeError("Error: wrong type of date")
 
     # Second parameter should be a store
     store_name_input = user_input[2]
@@ -72,7 +68,7 @@ def get_data() -> str:
             sensor_id_input = int(user_input[3])
             return connect_api(store_name_input, date_input, sensor_id_input)
         except ValueError:
-            return "Error: wrong type of sensor id"
+            raise TypeError("Error: wrong type of sensor id")
     else:
         return connect_api(store_name_input, date_input)
 
