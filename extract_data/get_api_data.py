@@ -37,9 +37,15 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
     response = requests.get(url)
 
     if response.status_code != 200:
-        print("Error in the API request:", response.status_code)
+        print("Code of the API request:", response.status_code)
+        return response.json()
 
     data = response.json()
+    data["date"] = queried_date.strftime("%Y-%m-%d")
+    data["store_name"] = store_name
+    if sensor_id is not None:
+        data["sensor_id"] = sensor_id
+
     return data
 
 
