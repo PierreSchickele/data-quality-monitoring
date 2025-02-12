@@ -1,5 +1,6 @@
 from read_raw_data import get_raw_data
 import duckdb
+import os
 
 # Load raw rata
 df = get_raw_data()
@@ -49,3 +50,12 @@ df_4days.loc[:, "pct_change"] = (
 ) / df_4days["avg_visits_last_4_same_day"]
 
 print(df_4days.head(40))
+
+df_final = df_4days.copy()
+
+# Save DataFrame to Parquet
+PROCESSED_DATA_PATH = "./data/processed/"
+parquet_path = os.path.join(PROCESSED_DATA_PATH, "final_data.parquet")
+df_final.to_parquet(parquet_path, index=False)
+
+print(f"Data saved to {parquet_path}")
