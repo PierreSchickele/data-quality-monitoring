@@ -3,34 +3,39 @@ import duckdb
 
 # Load raw rata
 df = get_raw_data()
-df_cleaned = df[df['sensor_id'] == 'ALL']
+df = df[df['sensor_id'] == 'ALL']
 
-print(df_cleaned.head())
-print(df_cleaned.describe())
+print(df.head())
+print(df.describe())
 
 # Group by day
-df_cleaned = (
+df_day = (
     duckdb
     .sql(
-        "SELECT date, store_name, sensor_id, SUM(visits_count)"
-        "FROM df_cleaned "
+        "SELECT date, store_name, sensor_id, SUM(visits_count) as visits_count "
+        "FROM df "
         "GROUP BY date, store_name, sensor_id"
     )
     .df()
 )
-print(df_cleaned.head())
-print(df_cleaned.describe())
+
+print(df_day.head())
+print(df_day.describe())
 
 # Remove rows with null values
-df_cleaned = df.dropna()
+df_cleaned = df_day.dropna()
+
 print(df_cleaned.head())
 print(df_cleaned.describe())
 
+# Add day_of_week column
 df_cleaned["day_of_week"] = df_cleaned["date"].dt.dayofweek
-# print(df_cleaned.head())
 
-# Average on the last 4 days
-df_cleaned = (
+print(df_cleaned.head())
+print(df_cleaned.describe())
+
+# Average on the last 4 similar days
+df_4days = (
     duckdb
     .sql(
         "SELECT date, store_name, sensor_id, visits_count, AVG(visits_count) "
@@ -43,4 +48,5 @@ df_cleaned = (
     .df()
 )
 
-print(df_cleaned)
+print(df_4days.head())
+print(df_4days.describe())
