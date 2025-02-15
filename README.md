@@ -44,7 +44,7 @@ Cette partie consiste à extraire les données brutes à partir de l'API afin de
 
 L'extraction des données brutes à partir de l'API peut être exécutée à partir de la commande suivante (il faut avoir établi la connexion avec l'API) :
 ```bash
-extract_data/script_get_api_data.sh
+python extract_data/get_api_data.py
 ```
 
 Les données sont alors enregistrées dans `data/raw`.

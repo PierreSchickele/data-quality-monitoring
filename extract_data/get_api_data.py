@@ -1,7 +1,6 @@
 import csv
 import os
-import sys
-from datetime import date
+from datetime import date, timedelta
 import requests
 
 
@@ -31,15 +30,14 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
     year, month, day = queried_date.year, queried_date.month, queried_date.day
 
     endpoint = "http://127.0.0.1:8000"
-    url = endpoint + f"?store_name={store_name}&year={year}&month={month}&day={day}"
-
+    url = f"{endpoint}?store_name={store_name}&year={year}&month={month}&day={day}"
     if sensor_id is not None:
         url += f"&sensor_id={sensor_id}"
 
     response = requests.get(url)
 
     if response.status_code != 200:
-        print("Code of the API request:", response.status_code)
+        print("API request failed with status code:", response.status_code)
         return response.json()
 
     data = response.json()
@@ -51,48 +49,15 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
     return data
 
 
-def get_data() -> str:
-    """
-    Print the API response into a string.
-    :return: a string which contains API response (JSON type or error)
-    """
-    user_input = sys.argv
-
-    # Check if there is enough parameters
-    if len(user_input) <= 2:
-        raise Exception("Error: not enough parameters")
-
-    # Check if the first parameter is a date
-    date_input = read_date_input(user_input[1])
-    if date_input is None:
-        raise TypeError("Error: wrong type of date")
-
-    # Second parameter should be a store
-    store_name_input = user_input[2]
-
-    # If more parameters, check if it is an integer
-    if len(user_input) > 3:
-        try:
-            sensor_id_input = int(user_input[3])
-            return connect_api(store_name_input, date_input, sensor_id_input)
-        except ValueError:
-            raise TypeError("Error: wrong type of sensor id")
-    else:
-        return connect_api(store_name_input, date_input)
-
-
-def write_csv():
-    # Write the output of get_data
-    output = get_data()
-
+def write_csv(output):
     # Check type of json data
     if isinstance(output, str) and output.__contains__("closed"):
         print(output)
         return 1
 
     if not isinstance(output, dict):
-        print(output)
-        raise Exception("Error: Unexpected JSON format")
+        print("Error: Unexpected JSON format")
+        return 1
 
     # Extract date, store_name and sensor_id
     date_str = output.pop("date")
@@ -127,9 +92,41 @@ def write_csv():
                 ]
             )
 
-    print(f"Données enregistrées dans {filename}")
+    print(
+        f"Day: {date_str}, "
+        f"store: {store_name}, "
+        f"sensor: {sensor_id if sensor_id is not None else 'ALL'}"
+    )
+    print(f"Data saved to {filename}")
     return 0
 
 
+def main():
+    stores = ["Lille", "Marseille", "Toulouse"]
+    years = ["2024"]
+    months = [f"{i:02}" for i in range(1, 13)]
+    sensors = []
+
+    for year in years:
+        for month in months:
+            first_day = date(int(year), int(month), 1)
+            last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(
+                day=1
+            ) - timedelta(days=1)
+
+            for day in range(1, last_day.day + 1):
+                date_str = f"{year}-{month}-{day:02}"
+                queried_date = read_date_input(date_str)
+
+                for store in stores:
+                    if sensors:
+                        for sensor in sensors:
+                            output = connect_api(store, queried_date, sensor)
+                            write_csv(output)
+                    else:
+                        output = connect_api(store, queried_date)
+                        write_csv(output)
+
+
 if __name__ == "__main__":
-    write_csv()
+    main()
