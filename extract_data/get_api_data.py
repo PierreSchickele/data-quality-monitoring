@@ -19,7 +19,7 @@ def read_date_input(input_date: str) -> date | None:
         print("Incorrect value. The date format should be: YYYY-MM-DD")
 
 
-def connect_api(store_name: str, queried_date: date, sensor_id: int = None):
+def connect_api(store_name: str, queried_date: date, sensor_id: int | None = None):
     """
     Connect to the API, and print the JSON output
     :param store_name: name of the store
@@ -67,6 +67,9 @@ def write_csv(output):
     # Extract the year and the month from the "date" field
     year, month = date_str.split("-")[:2]
 
+    # Write the unit
+    unit = "visitors"
+
     # Name the CSV file
     filename = f"data/raw/store_visits_{year}-{month}.csv"
 
@@ -79,7 +82,7 @@ def write_csv(output):
 
         # Write the CSV header only if the file is empty
         if not file_exists:
-            writer.writerow(["date", "hour", "store_name", "sensor_id", "visits_count"])
+            writer.writerow(["date", "hour", "store_name", "sensor_id", "visits_count", "unit"])
 
         for hour, visits_count in output.items():
             writer.writerow(
@@ -89,6 +92,7 @@ def write_csv(output):
                     store_name,
                     sensor_id if sensor_id is not None else "ALL",
                     visits_count,
+                    unit
                 ]
             )
 
@@ -105,7 +109,7 @@ def main():
     stores = ["Lille", "Marseille", "Toulouse"]
     years = ["2024"]
     months = [f"{i:02}" for i in range(1, 13)]
-    sensors = []
+    sensors = [None, 0, 1]
 
     for year in years:
         for month in months:
