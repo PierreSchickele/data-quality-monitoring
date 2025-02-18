@@ -9,27 +9,40 @@ PROCESSED_DATA_PATH = "./data/processed/final_data.parquet"
 query = f"SELECT * FROM '{PROCESSED_DATA_PATH}'"
 df = duckdb.query(query).df()
 
-# Selectbox of the existing sensors
-sensor_ids = df["sensor_id"].unique()
-selected_sensor = st.selectbox("Select a sensor :", sensor_ids)
+# Sidebar
+# Select the store
+st.sidebar.header("Filter data by store")
+stores = df["store_name"].unique()
+selected_store = st.sidebar.selectbox("Select a store :", stores)
 
-st.write(f"You chose sensor: {selected_sensor}")
+# Select the sensors
+filtered_df = df[df["store_name"] == selected_store]
+sensors = filtered_df["sensor_id"].unique()
+selected_sensor = st.sidebar.selectbox("Select a sensor :", sensors)
 
-# Print the dataframe for the selected sensor
-st.dataframe(df[df["sensor_id"] == selected_sensor].reset_index(drop=True))
+# Select the period
+period_options = {"Week": 7, "Month": 30, "Year": 365}
+selected_period = st.sidebar.radio("Print data for:", list(period_options.keys()))
 
-# Filter data for the selected sensor
-df_selected = df[df["sensor_id"] == selected_sensor].copy()
+# Filter data for the selected period
+filtered_df = filtered_df[filtered_df["sensor_id"] == selected_sensor]
+filtered_df = filtered_df.sort_values("date", ascending=True)
+filtered_df = filtered_df.iloc[-period_options[selected_period] :]
+
+st.write(f"You selected sensor: {selected_sensor}")
 
 # Ensure the date column is in datetime format
-df_selected["date"] = df_selected["date"].astype("datetime64[ns]")
+filtered_df["date"] = filtered_df["date"].astype("datetime64[ns]")
 
-# Sort by date
-df_selected = df_selected.sort_values(by="date")
+# Sort data by date
+filtered_df = filtered_df.sort_values(by="date", ascending=True)
 
-# Plot the evolution of the visits count per day and the 4-day average
+# Print the dataframe for the selected sensor
+st.dataframe(filtered_df.reset_index(drop=True))
+
+# Trace the plot
 fig = px.line(
-    df_selected,
+    filtered_df,
     x="date",
     y=["visits_count", "avg_visits_last_4_same_day"],
     title=f"Daily Visits and 4-Day Moving Average for Sensor {selected_sensor}",
