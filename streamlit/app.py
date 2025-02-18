@@ -24,13 +24,18 @@ df_selected = df[df["sensor_id"] == selected_sensor].copy()
 # Ensure the date column is in datetime format
 df_selected["date"] = df_selected["date"].astype("datetime64[ns]")
 
-# Plot the evolution of the visits count per day
+# Sort by date
+df_selected = df_selected.sort_values(by="date")
+
+# Plot the evolution of the visits count per day and the 4-day average
 fig = px.line(
     df_selected,
     x="date",
-    y="visits_count",
-    title=f"Daily Visits for Sensor {selected_sensor}",
-    labels={"visits_count": "Visits Count", "date": "Date"},
+    y=["visits_count", "avg_visits_last_4_same_day"],
+    title=f"Daily Visits and 4-Day Moving Average for Sensor {selected_sensor}",
+    labels={"value": "Visits Count", "date": "Date"},
 )
+
+fig.update_traces(mode="lines+markers")
 
 st.plotly_chart(fig)
