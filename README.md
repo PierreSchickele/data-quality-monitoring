@@ -14,6 +14,7 @@ L'objectif de ce projet est de :
 ├── processed    # Données transformées et stockées en format Parquet
 /extract_data    # Extraction des données à partir de l'API
 /src             # Définition des classes Sensor et Store
+/streamlit       # Dashboard de visualisation des données traitées
 /transform_data  # Chargement des données brutes, nettoyage et stockage en format Parquet
 ```
 
@@ -79,3 +80,17 @@ Le pipeline peut être exécuté avec la commande suivante :
 python transform_data/clean_data.py
 ```
 
+## Visualisation sur le dashboard Streamlit
+
+L'application Streamlit peut être lancée avec la commande suivante :
+
+```bash
+streamlit run streamlit/app.py
+```
+
+Sur le menu à gauche, sélectionner les options :
+- le nom du magasin (Lille, Marseille, Toulouse)
+- le numéro du capteur
+- la période (données de la semaine, données du mois, données de toute l'année)
+
+Le dashboard affichera alors les données traitées et les courbes d'évolution des visites.
