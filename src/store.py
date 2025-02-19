@@ -28,6 +28,10 @@ class StoreSensor:
         traffic_percentage = (weights / sum(weights)).tolist()
         np.random.shuffle(traffic_percentage)
 
+        # Avoid to have all the visits in one sensor
+        traffic_percentage = [max(p, 0.06) for p in traffic_percentage]
+        traffic_percentage = [p / sum(traffic_percentage) for p in traffic_percentage]
+
         # Initialisation of the store's sensors
         for i in range(number_sensors):
             sensor = Sensor(

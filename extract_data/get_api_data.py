@@ -82,7 +82,9 @@ def write_csv(output):
 
         # Write the CSV header only if the file is empty
         if not file_exists:
-            writer.writerow(["date", "hour", "store_name", "sensor_id", "visits_count", "unit"])
+            writer.writerow(
+                ["date", "hour", "store_name", "sensor_id", "visits_count", "unit"]
+            )
 
         for hour, visits_count in output.items():
             writer.writerow(
@@ -92,7 +94,7 @@ def write_csv(output):
                     store_name,
                     sensor_id if sensor_id is not None else "ALL",
                     visits_count,
-                    unit
+                    unit,
                 ]
             )
 
