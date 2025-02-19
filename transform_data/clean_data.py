@@ -4,16 +4,13 @@ import os
 
 # Load raw rata
 df = get_raw_data()
-df = df[df["sensor_id"] == "ALL"]
-
-print(df.head())
-print(df.describe())
+df = df[df["unit"] == "visitors"]
 
 # Group by day
 df_day = duckdb.sql(
-    "SELECT date, store_name, sensor_id, SUM(visits_count) as visits_count "
+    "SELECT date, store_name, sensor_id, SUM(visits_count) as visits_count, unit "
     "FROM df "
-    "GROUP BY date, store_name, sensor_id "
+    "GROUP BY date, store_name, sensor_id, unit "
     "ORDER BY store_name, date"
 ).df()
 
@@ -33,13 +30,13 @@ print(df_cleaned.head())
 
 # Average on the last 4 similar days
 df_4days = duckdb.sql(
-    "SELECT date, store_name, sensor_id, visits_count, AVG(visits_count) "
-    "OVER (PARTITION BY day_of_week, store_name, sensor_id "
+    "SELECT date, store_name, sensor_id, visits_count, unit, AVG(visits_count) "
+    "OVER (PARTITION BY day_of_week, store_name, sensor_id, unit "
     "ORDER BY date "
     "ROWS BETWEEN 3 PRECEDING AND CURRENT ROW "
     ") AS avg_visits_last_4_same_day "
     "FROM df_cleaned "
-    "ORDER BY store_name, date"
+    "ORDER BY store_name, sensor_id, date"
 ).df()
 
 print(df_4days.head())
