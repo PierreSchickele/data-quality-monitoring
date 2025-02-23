@@ -97,7 +97,7 @@ def write_csv(output):
                         visits_count,
                         "objects",
                     ]
-            )
+                )
         elif date_str == "2024-01-02":
             for hour, visits_count in output.items():
                 writer.writerow(
@@ -109,7 +109,7 @@ def write_csv(output):
                         "",
                         unit,
                     ]
-            )
+                )
         else:
             for hour, visits_count in output.items():
                 writer.writerow(
