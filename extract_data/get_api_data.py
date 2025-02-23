@@ -25,7 +25,7 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int | None = Non
     :param store_name: name of the store
     :param queried_date: date of the observation
     :param sensor_id: id of the sensor (optional)
-    :return: no output
+    :return: The result of the request in dict format
     """
     year, month, day = queried_date.year, queried_date.month, queried_date.day
 
