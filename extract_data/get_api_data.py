@@ -67,9 +67,6 @@ def write_csv(output):
     # Extract the year and the month from the "date" field
     year, month = date_str.split("-")[:2]
 
-    # Write the unit
-    unit = "visitors"
-
     # Ensure the directory "data/raw" exists
     os.makedirs("data/raw", exist_ok=True)
 
@@ -89,42 +86,18 @@ def write_csv(output):
                 ["date", "hour", "store_name", "sensor_id", "visits_count", "unit"]
             )
 
-        if date_str == "2024-01-01":
-            for hour, visits_count in output.items():
-                writer.writerow(
-                    [
-                        date_str,
-                        int(hour),
-                        store_name,
-                        sensor_id if sensor_id is not None else "ALL",
-                        visits_count,
-                        "objects",
-                    ]
-                )
-        elif date_str == "2024-01-02":
-            for hour, visits_count in output.items():
-                writer.writerow(
-                    [
-                        date_str,
-                        int(hour),
-                        store_name,
-                        sensor_id if sensor_id is not None else "ALL",
-                        "",
-                        unit,
-                    ]
-                )
-        else:
-            for hour, visits_count in output.items():
-                writer.writerow(
-                    [
-                        date_str,
-                        int(hour),
-                        store_name,
-                        sensor_id if sensor_id is not None else "ALL",
-                        visits_count,
-                        unit,
-                    ]
-                )
+        unit = "visitors"
+        for hour, visits_count in output.items():
+            writer.writerow(
+                [
+                    date_str,
+                    int(hour),
+                    store_name,
+                    sensor_id if sensor_id is not None else "ALL",
+                    "" if date_str == "2024-01-02" else visits_count,
+                    "objects" if date_str == "2024-01-01" else unit,
+                ]
+            )
 
     print(
         f"Day: {date_str}, "
