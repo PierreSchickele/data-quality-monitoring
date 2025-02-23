@@ -70,6 +70,9 @@ def write_csv(output):
     # Write the unit
     unit = "visitors"
 
+    # Ensure the directory "data/raw" exists
+    os.makedirs("data/raw", exist_ok=True)
+
     # Name the CSV file
     filename = f"data/raw/store_visits_{year}-{month}.csv"
 
