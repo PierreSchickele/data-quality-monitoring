@@ -44,7 +44,7 @@ with DAG(
     # [START howto_operator_bash]
     transform_operator = BashOperator(
         task_id="transform_operator",
-        bash_command="echo transform",
+        bash_command="cd ~/data-quality-monitoring/ && python transform_data/clean_data.py",
     )
     # [END howto_operator_bash]
 
