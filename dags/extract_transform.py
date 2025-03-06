@@ -15,7 +15,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Example DAG demonstrating the usage of the BashOperator."""
 
 from __future__ import annotations
 
@@ -29,24 +28,21 @@ from airflow.operators.bash import BashOperator
 with DAG(
     dag_id="extract_transform",
     schedule="30 * * * *",
-    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
-    catchup=False,
+    start_date=pendulum.datetime(2024, 1, 1, tz="UTC"),
+    end_date=pendulum.datetime(2024, 12, 31, tz="UTC"),
+    catchup=True,
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["extract", "transform"],
     params={"example_key": "example_value"},
 ) as dag:
-    # [START howto_operator_bash]
     extract_operator = BashOperator(
         task_id="extract_operator",
-        bash_command="cd ~/data-quality-monitoring/ && python extract_data/get_api_data.py",
+        bash_command="cd ~/data-quality-monitoring/ && python extract_data/get_api_data.py --execution_date '{{ ds }}' --execution_hour {{ execution_date.hour }}",
     )
-    # [END howto_operator_bash]
-    # [START howto_operator_bash]
     transform_operator = BashOperator(
         task_id="transform_operator",
         bash_command="cd ~/data-quality-monitoring/ && python transform_data/clean_data.py",
     )
-    # [END howto_operator_bash]
 
     extract_operator >> transform_operator
 
