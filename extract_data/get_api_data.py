@@ -74,11 +74,10 @@ def write_csv(output, exec_hour):
 
         unit = "visitors"
         visits_count = output.get(str(exec_hour), "")
-        # for hour, visits_count in output.items():
         writer.writerow(
             [
                 date_str,
-                exec_hour, #int(hour),
+                exec_hour,
                 store_name,
                 sensor_id if sensor_id is not None else "ALL",
                 "" if date_str == "2024-01-02" else visits_count,
