@@ -2,21 +2,7 @@ import csv
 import os
 from datetime import date, timedelta
 import requests
-
-
-def read_date_input(input_date: str) -> date | None:
-    """
-    Verify that the parameter given by the user is a date in YYYY-MM-DD format,
-    then return the date.
-    :param input_date: parameter entered by the user
-    :return: The date in YYYY-MM-DD format
-    """
-    try:
-        year, month, day = [int(v) for v in input_date.split("-")]
-        queried_date = date(year, month, day)
-        return queried_date
-    except ValueError:
-        print("Incorrect value. The date format should be: YYYY-MM-DD")
+import argparse
 
 
 def connect_api(store_name: str, queried_date: date, sensor_id: int | None = None):
@@ -49,7 +35,7 @@ def connect_api(store_name: str, queried_date: date, sensor_id: int | None = Non
     return data
 
 
-def write_csv(output):
+def write_csv(output, exec_hour):
     # Check type of json data
     if isinstance(output, str) and output.__contains__("closed"):
         print(output)
@@ -87,52 +73,51 @@ def write_csv(output):
             )
 
         unit = "visitors"
-        for hour, visits_count in output.items():
-            writer.writerow(
-                [
-                    date_str,
-                    int(hour),
-                    store_name,
-                    sensor_id if sensor_id is not None else "ALL",
-                    "" if date_str == "2024-01-02" else visits_count,
-                    "objects" if date_str == "2024-01-01" else unit,
-                ]
-            )
+        visits_count = output.get(str(exec_hour), "")
+        # for hour, visits_count in output.items():
+        writer.writerow(
+            [
+                date_str,
+                exec_hour, #int(hour),
+                store_name,
+                sensor_id if sensor_id is not None else "ALL",
+                "" if date_str == "2024-01-02" else visits_count,
+                "objects" if date_str == "2024-01-01" else unit,
+            ]
+        )
 
-    print(
-        f"Day: {date_str}, "
-        f"store: {store_name}, "
-        f"sensor: {sensor_id if sensor_id is not None else 'ALL'}"
-    )
-    print(f"Data saved to {filename}")
     return 0
+
+
+def parse_execution_datetime() -> tuple[date, int]:
+    """Parse execution date and hour."""
+    parser = argparse.ArgumentParser(description="Extract store visit data.")
+    parser.add_argument(
+        "--execution_date",
+        type=str,
+        default=date.today().strftime("%Y-%m-%d"),
+        help="Execution date in YYYY-MM-DD format.",
+    )
+    parser.add_argument(
+        "--execution_hour",
+        type=int,
+        help="Execution hour (0-23).",
+        required=True,
+    )
+    args = parser.parse_args()
+    return date.fromisoformat(args.execution_date), args.execution_hour
 
 
 def main():
     stores = ["Lille", "Marseille", "Toulouse"]
-    years = ["2024"]
-    months = [f"{i:02}" for i in range(1, 13)]
     sensors = [None, 0, 1]
 
-    for year in years:
-        for month in months:
-            first_day = date(int(year), int(month), 1)
-            last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(
-                day=1
-            ) - timedelta(days=1)
+    exec_date, exec_hour = parse_execution_datetime()
 
-            for day in range(1, last_day.day + 1):
-                date_str = f"{year}-{month}-{day:02}"
-                queried_date = read_date_input(date_str)
-
-                for store in stores:
-                    if sensors:
-                        for sensor in sensors:
-                            output = connect_api(store, queried_date, sensor)
-                            write_csv(output)
-                    else:
-                        output = connect_api(store, queried_date)
-                        write_csv(output)
+    for store in stores:
+        for sensor in sensors:
+            output = connect_api(store, exec_date, sensor)
+            write_csv(output, exec_hour)
 
 
 if __name__ == "__main__":
