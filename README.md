@@ -2,20 +2,31 @@
 
 L'objectif de ce projet est de :
 - collecter des données d'observation par une API ;
-- les nettoyer ;
-- faire une visualisation par Streamlit des observations de la journée et des quatre derniers jours.
+- transformer ces données et les stocker ;
+- orchestrer ces étapes de collecte et de transformation ;
+- faire une visualisation par Streamlit.
 
 ## Structure du projet
 
 ```
 /api             # Application API
+/dags            # DAG pour orchestrer les tâches du pipeline
 /data
 ├── raw          # Données brutes initiales
 ├── processed    # Données transformées et stockées en format Parquet
 /extract_data    # Extraction des données à partir de l'API
+/logs            # Logs de l'orchestrateur Airflow
 /src             # Définition des classes Sensor et Store
 /streamlit       # Dashboard de visualisation des données traitées
 /transform_data  # Chargement des données brutes, nettoyage et stockage en format Parquet
+/venv            # Environnement virtuel
+```
+
+## Activation de l'environnement virtuel
+
+Pour activer l'environnement virtuel :
+```
+source venv/bin/activate
 ```
 
 ## Requête sur l'API
@@ -83,6 +94,32 @@ Le pipeline peut être exécuté avec la commande suivante :
 
 ```bash
 python transform_data/clean_data.py
+```
+
+## Automatisation
+
+### Script d'exécution des données passées
+
+Les données passées peuvent être automatiquement extraites par un script Bash :
+
+```bash
+./extract_data/script_get_api_data.sh
+```
+
+### Orchestration avec Airflow
+
+Les tâches d'extraction et de transformation peuvent être planifiées dans le fichier `dags/extract_transform.py`.
+
+Le DAG contient deux tâches BashOperator exécutées toutes les heures :
+- `extract_operator` pour l'extraction ;
+- `transform_operator` pour la transformation.
+
+Les paramètres `start_date` et `end_date` (si besoin) permettent de planifier les dates d'exécution du DAG.
+
+Pour démarrer Airflow, exécuter le script Bash suivant :
+
+```bash
+./airflow_start.sh
 ```
 
 ## Visualisation sur le dashboard Streamlit
